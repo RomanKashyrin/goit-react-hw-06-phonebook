@@ -1,46 +1,42 @@
 import css from './ContactList.module.css';
-import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Notification from 'components/Notification/Notification';
+import { deleteItems } from 'redux/contactSlice';
+import { getFilter, getContacts } from 'redux/selector';
 
 const ContactList = () => {
-  const [contacts, setContacts] = useState();
-  const deleteContact = e => {
-    setContacts(prevState => prevState.filter(contact => contact.id !== e));
-  };
+    const filterInput = useSelector(getFilter);
+    const contacts = useSelector(getContacts);
+    const dispatch = useDispatch();
 
-  return (
-    <div className={css.list_box}>
-      <ul className={css.list}>
-        {contacts.map(({ id, name, number }) => (
-          <li key={id} className={css.item}>
-            <p className={css.contact_name}>
-              {name} ------------ {number}
-            </p>
+    const getContactsList = () => {
+        const isAddedFilter = filterInput.toLowerCase();
 
-            <button
-              className={css.btn_delete_contact}
-              type="submit"
-              onClick={() => deleteContact(id)}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+        return contacts.filter(contact =>
+            contact.name.toLowerCase().includes(isAddedFilter)
+        );
+    };
 
-ContactList.protoType = {
-  contact: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number,
-      name: PropTypes.string,
-      number: PropTypes.number,
-    })
-  ),
+    const filtredList = getContactsList();
 
-  onDeleteContact: PropTypes.func,
-};
+    return (
+        <div className={css.list_box}>
+            <ul className={css.list}>
+                {filtredList.length > 0 ? (
+                    filtredList.map(({ id, name, number }) => (
+                        <li key={id} className={css.item}>
+                            <p className={css.contact_name}>{name} ------------ {number}</p>
+
+                            <button className={css.btn_delete_contact} type='submit' onClick={() => dispatch(deleteItems(id))}>Delete</button>
+                        </li>
+                    ))
+                ) : (
+                    <Notification message="Contact list is empty" />
+                )}
+            </ul>
+        </div>
+
+    );
+}
 
 export default ContactList;

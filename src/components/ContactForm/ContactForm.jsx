@@ -1,18 +1,10 @@
-import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
+import { useState } from 'react';
 import css from './ContactForm.module.css';
 
-const ContactForm = () => {
+const ContactForm = ({ onSubmit }) => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-
-  const [contacts, setContacts] = useState(
-    JSON.parse(localStorage.getItem('contacts')) ?? []
-  );
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
 
   const handleChange = e => {
     const prop = e.currentTarget.name;
@@ -29,12 +21,7 @@ const ContactForm = () => {
   };
 
   const addContact = async e => {
-    const isNameAdded = name.toUpperCase();
-
-    if (isNameAdded) {
-      alert(`${name} is already in contacts`);
-      return;
-    }
+    e.preventDefault();
 
     const contact = {
       id: nanoid(),
@@ -42,7 +29,10 @@ const ContactForm = () => {
       number: number,
     };
 
-    setContacts(prevContacts => [...prevContacts, contact]);
+    onSubmit(contact);
+
+    setName('');
+    setNumber('');
   };
 
   return (
